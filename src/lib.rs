@@ -1,5 +1,7 @@
 use core::f64;
 
+use rgb::{FromSlice, Rgb};
+
 pub fn basename2(string: &str) {
     todo!()
 }
@@ -121,9 +123,43 @@ pub fn rgb2xterm_cie94(r: u8, g: u8, b: u8) -> u32 {
 
     srgb2lab(r, g, b, &mut l, &mut aa, &mut bb);
 
-    while i < 256{
+    while i < 256 {}
 
+    // ret
+    todo!()
+}
+
+//TODO since png crate does the decoding for us, idk if we need to do color conversion
+
+pub fn rgbify_buffer(buf: &[u8], info: png::Info<'_>) -> Vec<Rgb<u8>> {
+    match info.color_type {
+        png::ColorType::Rgb => {
+            //direct rgb conversion in theory
+            Vec::from(buf.as_rgb())
+        }
+        png::ColorType::Rgba => Vec::from(buf.as_rgba().to_vec().in),
+        png::ColorType::Grayscale => (
+            {
+                let mut vec = Vec::with_capacity(img_data.len() * 3);
+                for g in img_data {
+                    vec.extend([g, g, g].iter().cloned())
+                }
+                vec
+            },
+            ClientFormat::U8U8U8,
+        ),
+        png::ColorType::GrayscaleAlpha => (
+            {
+                let mut vec = Vec::with_capacity(img_data.len() * 3);
+                for ga in img_data.chunks(2) {
+                    let g = ga[0];
+                    let a = ga[1];
+                    vec.extend([g, g, g, a].iter().cloned())
+                }
+                vec
+            },
+            ClientFormat::U8U8U8U8,
+        ),
+        _ => unreachable!("uncovered color type"),
     }
-
-    ret
 }
